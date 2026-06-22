@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Register - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="login-wrapper">
+  <div class="login-card login-card-wide">
+    <div class="login-header">
+      <span class="brand-icon large">&#9733;</span>
+      <h1>Create Account</h1>
+      <p>Join Deluxe Supermarket and start earning loyalty rewards</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('register') }}" class="login-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="first_name">First Name *</label>
+          <input type="text" id="first_name" name="first_name" required placeholder="First name">
+        </div>
+        <div class="form-group">
+          <label for="last_name">Last Name *</label>
+          <input type="text" id="last_name" name="last_name" required placeholder="Last name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="username">Username *</label>
+        <input type="text" id="username" name="username" required placeholder="Choose a username">
+      </div>
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" required placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" placeholder="Optional phone number">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Password *</label>
+          <input type="password" id="password" name="password" required placeholder="Min. 6 characters">
+        </div>
+        <div class="form-group">
+          <label for="confirm_password">Confirm Password *</label>
+          <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repeat password">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+    </form>
+
+    <p class="login-hint">
+      Already have an account? <a href="{{ url_for('user_login') }}">Sign in here</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

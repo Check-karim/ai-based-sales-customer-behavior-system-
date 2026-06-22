@@ -1,0 +1,52 @@
+---
+description: Deluxe Supermarket AI sales system conventions and architecture
+alwaysApply: true
+---
+
+# Deluxe Supermarket - Project Rules
+
+## Stack
+
+- Python 3.10+ with Flask for the web layer
+- MySQL 8.0+ via `mysql-connector-python`
+- scikit-learn for AI analytics (RFM segmentation, churn scoring, forecasting)
+- openpyxl for Excel reports, ReportLab for PDF reports
+
+## Project Structure
+
+- `app.py` — Flask routes, auth, and session management
+- `config.py` — Environment-based configuration (use `.env`)
+- `database.py` — All SQL goes through `execute_query()` helpers
+- `services/ai_analytics.py` — Analytics and ML logic only
+- `services/reports.py` — PDF/Excel generation only
+- `templates/` — Jinja2 HTML templates extending `base.html`
+- `schema.sql` — Database schema and seed data
+
+## Coding Conventions
+
+- Use 2-space indentation in Python files
+- Keep business logic in `services/`, not in route handlers
+- Use parameterized queries (`%s` placeholders) — never string-interpolate SQL
+- Admin credentials: username `admin`, password `admin` at `/admin/login`
+- Customer auth: register at `/register`, login at `/login`
+- Public pages: `/` (home), `/about`
+- Passwords stored as werkzeug hashes via `generate_password_hash()`
+
+## Database
+
+- Database name: `deluxe_supermarket`
+- Run `python init_db.py` after schema changes or first setup
+- Seed data lives in `schema.sql`; admin user is created by `init_db.py`
+
+## Adding Features
+
+- New analytics: add functions to `services/ai_analytics.py`, call from dashboard
+- New report sections: update both `reports.py` and the dashboard template
+- New routes: protect with `@login_required` decorator
+- New tables: update `schema.sql` and add seed data
+
+## Do Not
+
+- Hardcode MySQL credentials — use `config.py` / `.env`
+- Add frontend frameworks — keep plain HTML/CSS/Jinja2
+- Commit `.env` files with real passwords

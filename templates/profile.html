@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}My Account - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>My Account</h1>
+  <p>Welcome back, {{ user.first_name }}!</p>
+</div>
+
+<div class="profile-grid">
+  <section class="panel">
+    <h2>Account Details</h2>
+    <dl class="profile-details">
+      <dt>Username</dt>
+      <dd>{{ user.username }}</dd>
+      <dt>Full Name</dt>
+      <dd>{{ user.first_name }} {{ user.last_name }}</dd>
+      <dt>Email</dt>
+      <dd>{{ user.email }}</dd>
+      <dt>Phone</dt>
+      <dd>{{ user.phone or 'Not provided' }}</dd>
+      <dt>Member Since</dt>
+      <dd>{{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'N/A' }}</dd>
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h2>Loyalty Program</h2>
+    <div class="loyalty-badge">
+      <span class="badge badge-{{ user.loyalty_tier|lower if user.loyalty_tier else 'bronze' }} badge-large">
+        {{ user.loyalty_tier or 'Bronze' }} Member
+      </span>
+    </div>
+    <p class="loyalty-info">
+      Earn points with every purchase. Shop more to unlock Silver, Gold, and Platinum tiers
+      for exclusive discounts and rewards.
+    </p>
+  </section>
+
+  <section class="panel full-width">
+    <h2>Recent Purchases</h2>
+    {% if purchases %}
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Payment Method</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for purchase in purchases %}
+          <tr>
+            <td>{{ purchase.sale_date.strftime('%b %d, %Y %H:%M') if purchase.sale_date else 'N/A' }}</td>
+            <td>${{ "%.2f"|format(purchase.total_amount|float) }}</td>
+            <td>{{ purchase.payment_method }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No purchases yet. Visit our store to start earning rewards!</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

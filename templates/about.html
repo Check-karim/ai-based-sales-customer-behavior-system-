@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}About Us - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>About Deluxe Supermarket</h1>
+  <p>Your neighborhood store for quality groceries since 1998</p>
+</div>
+
+<section class="about-section">
+  <div class="about-grid">
+    <div class="about-card">
+      <h2>Our Story</h2>
+      <p>
+        Deluxe Supermarket began as a small family-owned grocery store with a simple mission:
+        provide the community with fresh, affordable food and exceptional customer service.
+        Over 25 years later, we have grown into a trusted destination for thousands of families,
+        while never losing sight of what matters most — quality products and happy customers.
+      </p>
+    </div>
+    <div class="about-card">
+      <h2>Our Mission</h2>
+      <p>
+        We are committed to sourcing the finest products, supporting local farmers and suppliers,
+        and creating a welcoming shopping environment for everyone. Every aisle in our store
+        reflects our dedication to freshness, value, and community.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="values-section">
+  <h2 class="section-title">Our Values</h2>
+  <div class="values-grid">
+    <div class="value-item">
+      <h3>Quality</h3>
+      <p>We carefully select every product on our shelves to meet the highest standards.</p>
+    </div>
+    <div class="value-item">
+      <h3>Community</h3>
+      <p>We support local producers and give back to the neighborhoods we serve.</p>
+    </div>
+    <div class="value-item">
+      <h3>Integrity</h3>
+      <p>Honest pricing, transparent sourcing, and trustworthy service — always.</p>
+    </div>
+    <div class="value-item">
+      <h3>Innovation</h3>
+      <p>We use AI-powered analytics to understand customer needs and improve your experience.</p>
+    </div>
+  </div>
+</section>
+
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">25+</div>
+      <div class="stat-label">Years of Service</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">10,000+</div>
+      <div class="stat-label">Happy Customers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">500+</div>
+      <div class="stat-label">Products Available</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">8</div>
+      <div class="stat-label">Product Categories</div>
+    </div>
+  </div>
+</section>
+
+<section class="about-cta">
+  <h2>Join the Deluxe Family</h2>
+  <p>Register today to access your account, track purchases, and earn loyalty rewards.</p>
+  <a href="{{ url_for('register') }}" class="btn btn-primary">Register Now</a>
+</section>
+{% endblock %}

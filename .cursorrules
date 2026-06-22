@@ -1,0 +1,12 @@
+# Deluxe Supermarket - Cursor Rules
+
+See `.cursor/rules/deluxe-supermarket.mdc` for full project conventions.
+
+## Quick Reference
+
+- **Stack**: Python/Flask + MySQL + scikit-learn
+- **Admin**: username `admin`, password `admin`
+- **Run**: `python init_db.py` then `python app.py`
+- **Config**: `.env` file (copy from `.env.example`)
+- **Logic**: `services/` for analytics and reports; `app.py` for routes only
+- **SQL**: Always use parameterized queries via `database.py`

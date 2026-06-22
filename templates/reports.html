@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Reports - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Download Reports</h1>
+  <p>Export comprehensive sales and customer behavior analytics</p>
+</div>
+
+<section class="reports-grid">
+  <div class="report-card">
+    <div class="report-icon excel">XLS</div>
+    <h2>Excel Report</h2>
+    <p>Multi-sheet workbook with sales summary, monthly data, customer segments, churn analysis, purchase patterns, and AI insights.</p>
+    <ul class="report-features">
+      <li>Sales Summary</li>
+      <li>Monthly Sales</li>
+      <li>Top Products</li>
+      <li>Customer Segments</li>
+      <li>Churn Risk</li>
+      <li>AI Insights</li>
+    </ul>
+    <a href="{{ url_for('download_excel') }}" class="btn btn-excel">Download Excel (.xlsx)</a>
+  </div>
+
+  <div class="report-card">
+    <div class="report-icon pdf">PDF</div>
+    <h2>PDF Report</h2>
+    <p>Professional formatted report with key metrics, AI forecasts, top products, customer segments, and behavior insights.</p>
+    <ul class="report-features">
+      <li>Sales Summary</li>
+      <li>AI Sales Forecast</li>
+      <li>Top Products</li>
+      <li>Customer Segments</li>
+      <li>Churn Risk Analysis</li>
+      <li>AI Behavior Insights</li>
+    </ul>
+    <a href="{{ url_for('download_pdf') }}" class="btn btn-pdf">Download PDF</a>
+  </div>
+</section>
+{% endblock %}

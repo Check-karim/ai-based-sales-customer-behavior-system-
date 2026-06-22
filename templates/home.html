@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Home - Deluxe Supermarket{% endblock %}
+{% block main_class %}container-wide{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-content">
+    <h1>Welcome to Deluxe Supermarket</h1>
+    <p>Fresh products, unbeatable prices, and a shopping experience you'll love.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('register') }}" class="btn btn-primary">Join Now</a>
+      <a href="{{ url_for('about') }}" class="btn btn-outline">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<section class="features-section">
+  <h2 class="section-title">Why Shop With Us</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#127822;</div>
+      <h3>Fresh Produce</h3>
+      <p>Farm-fresh fruits and vegetables delivered daily to our shelves.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#11088;</div>
+      <h3>Loyalty Rewards</h3>
+      <p>Earn points with every purchase and unlock exclusive member benefits.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128176;</div>
+      <h3>Best Prices</h3>
+      <p>Competitive pricing on thousands of products across all categories.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128666;</div>
+      <h3>Fast Service</h3>
+      <p>Quick checkout and friendly staff to make your visit enjoyable.</p>
+    </div>
+  </div>
+</section>
+
+{% if featured_products %}
+<section class="products-section">
+  <h2 class="section-title">Featured Products</h2>
+  <div class="products-grid">
+    {% for product in featured_products %}
+    <div class="product-card">
+      <div class="product-category">{{ product.category }}</div>
+      <h3>{{ product.name }}</h3>
+      <div class="product-price">${{ "%.2f"|format(product.price|float) }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="cta-section">
+  <h2>Ready to start shopping?</h2>
+  <p>Create your free account today and join our loyalty program.</p>
+  {% if session.user_id %}
+    <a href="{{ url_for('profile') }}" class="btn btn-primary">Go to My Account</a>
+  {% else %}
+    <a href="{{ url_for('register') }}" class="btn btn-primary">Create Account</a>
+    <a href="{{ url_for('user_login') }}" class="btn btn-outline-light">Sign In</a>
+  {% endif %}
+</section>
+{% endblock %}

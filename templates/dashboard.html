@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Admin Dashboard</h1>
+  <p>AI-powered sales analytics and customer behavior insights</p>
+</div>
+
+<section class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-value">${{ "%.2f"|format(data.summary.total_revenue|float) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Transactions</div>
+    <div class="stat-value">{{ data.summary.total_transactions }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Avg Transaction</div>
+    <div class="stat-value">${{ "%.2f"|format(data.summary.avg_transaction|float) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Unique Customers</div>
+    <div class="stat-value">{{ data.summary.unique_customers }}</div>
+  </div>
+</section>
+
+<section class="forecast-banner">
+  <div class="forecast-item">
+    <span class="forecast-label">AI Forecast Revenue</span>
+    <span class="forecast-value">${{ "%.2f"|format(data.forecast.forecast_revenue|float) }}</span>
+  </div>
+  <div class="forecast-item">
+    <span class="forecast-label">Growth Rate</span>
+    <span class="forecast-value {{ 'positive' if data.forecast.growth_rate >= 0 else 'negative' }}">
+      {{ data.forecast.growth_rate }}%
+    </span>
+  </div>
+  <div class="forecast-item">
+    <span class="forecast-label">Confidence</span>
+    <span class="forecast-value">{{ data.forecast.confidence }}%</span>
+  </div>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2>Top Products</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Units</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for product in data.top_products %}
+          <tr>
+            <td>{{ product.product_name }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.units_sold }}</td>
+            <td>${{ "%.2f"|format(product.revenue|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No data available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Customer Segments (AI)</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Tier</th>
+            <th>Segment</th>
+            <th>Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for customer in data.customer_segments %}
+          <tr>
+            <td>{{ customer.customer_name }}</td>
+            <td><span class="badge badge-{{ customer.loyalty_tier|lower }}">{{ customer.loyalty_tier }}</span></td>
+            <td>{{ customer.segment }}</td>
+            <td>{{ customer.ai_score }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No data available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Churn Risk Analysis</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Churn %</th>
+            <th>Risk</th>
+            <th>Spent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in data.churn_risk %}
+          <tr>
+            <td>{{ row.customer_name }}</td>
+            <td>{{ row.churn_probability }}%</td>
+            <td><span class="badge badge-{{ row.risk_level|lower }}">{{ row.risk_level }}</span></td>
+            <td>${{ "%.2f"|format(row.monetary|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No data available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Purchase Patterns</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Purchases</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pattern in data.purchase_patterns %}
+          <tr>
+            <td>{{ pattern.category }}</td>
+            <td>{{ pattern.purchase_count }}</td>
+            <td>${{ "%.2f"|format(pattern.category_revenue|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty">No data available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel full-width">
+    <h2>AI Behavior Insights</h2>
+    <div class="insights-grid">
+      {% for insight in data.behavior_insights %}
+      <div class="insight-card">
+        <div class="insight-type">{{ insight.type }}</div>
+        <div class="insight-customer">{{ insight.customer_name }}</div>
+        <div class="insight-value">{{ insight.value }}</div>
+        <div class="insight-confidence">Confidence: {{ insight.confidence }}%</div>
+      </div>
+      {% else %}
+      <p class="empty">No insights generated yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Payment Methods</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Count</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for pm in data.payment_methods %}
+          <tr>
+            <td>{{ pm.payment_method }}</td>
+            <td>{{ pm.count }}</td>
+            <td>${{ "%.2f"|format(pm.total|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="empty">No data available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Loyalty Tier Analysis</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Tier</th>
+            <th>Customers</th>
+            <th>Total Spent</th>
+            <th>Avg Spent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tier in data.loyalty_analysis %}
+          <tr>
+            <td><span class="badge badge-{{ tier.loyalty_tier|lower }}">{{ tier.loyalty_tier }}</span></td>
+            <td>{{ tier.customer_count }}</td>
+            <td>${{ "%.2f"|format(tier.total_spent|float) }}</td>
+            <td>${{ "%.2f"|format(tier.avg_spent|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No data available</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
