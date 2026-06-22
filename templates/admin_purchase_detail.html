@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Purchase #{{ purchase.id }} - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Purchase #{{ purchase.id }}</h1>
+  <p>{{ purchase.customer_name }} — {{ purchase.sale_date.strftime('%B %d, %Y at %H:%M') if purchase.sale_date else 'N/A' }}</p>
+</div>
+
+<div class="profile-grid">
+  <section class="panel">
+    <h2>Order Details</h2>
+    <dl class="profile-details">
+      <dt>Customer</dt>
+      <dd>{{ purchase.customer_name }}</dd>
+      <dt>Email</dt>
+      <dd>{{ purchase.customer_email or 'N/A' }}</dd>
+      <dt>Payment Method</dt>
+      <dd>{{ purchase.payment_method }}</dd>
+      <dt>Total Amount</dt>
+      <dd>${{ "%.2f"|format(purchase.total_amount|float) }}</dd>
+      <dt>Current Status</dt>
+      <dd><span class="badge badge-status badge-{{ purchase.status|lower }}">{{ purchase.status }}</span></dd>
+    </dl>
+
+    <form method="POST" action="{{ url_for('admin_update_purchase_status', sale_id=purchase.id) }}" class="status-form">
+      <h3>Update Status</h3>
+      <div class="form-group">
+        <select name="status" required>
+          {% for status in statuses %}
+          <option value="{{ status }}" {% if purchase.status == status %}selected{% endif %}>{{ status }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Update Status</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Line Items</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in purchase.line_items %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ "%.2f"|format(item.unit_price|float) }}</td>
+            <td>${{ "%.2f"|format(item.subtotal|float) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<a href="{{ url_for('admin_purchases') }}" class="btn btn-outline-dark">Back to Purchases</a>
+{% endblock %}

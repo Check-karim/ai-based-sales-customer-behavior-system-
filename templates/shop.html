@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Shop - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header shop-header">
+  <div>
+    <h1>Shop</h1>
+    <p>Browse our available products and add them to your cart.</p>
+  </div>
+  {% if session.user_id %}
+  <a href="{{ url_for('cart') }}" class="btn btn-primary">
+    Cart{% if cart_count %} ({{ cart_count }}){% endif %}
+  </a>
+  {% endif %}
+</div>
+
+{% if products %}
+<div class="products-grid shop-grid">
+  {% for product in products %}
+  <div class="product-card shop-card">
+    <div class="product-category">{{ product.category }}</div>
+    <h3>{{ product.name }}</h3>
+    <div class="product-price">${{ "%.2f"|format(product.price|float) }}</div>
+    <p class="stock-info">{{ product.stock_quantity }} in stock</p>
+    {% if session.user_id %}
+    <form method="POST" action="{{ url_for('add_to_cart') }}" class="buy-form">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <div class="qty-row">
+        <label for="qty-{{ product.id }}">Qty</label>
+        <input type="number" id="qty-{{ product.id }}" name="quantity" value="1" min="1" max="{{ product.stock_quantity }}" class="qty-input">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Add to Cart</button>
+    </form>
+    {% else %}
+    <a href="{{ url_for('user_login') }}" class="btn btn-outline-dark btn-block">Login to Buy</a>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty">No products available at the moment. Check back soon!</p>
+{% endif %}
+{% endblock %}

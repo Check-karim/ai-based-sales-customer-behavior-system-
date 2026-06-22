@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}AI Predictions - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>AI Predictions</h1>
+  <p>Sales forecasts, customer segmentation, and behavior insights.</p>
+</div>
+
+<section class="forecast-banner">
+  <div class="forecast-item">
+    <span class="forecast-label">Forecast Revenue (30 days)</span>
+    <span class="forecast-value">${{ "%.2f"|format(data.forecast.forecast_revenue|float) }}</span>
+  </div>
+  <div class="forecast-item">
+    <span class="forecast-label">Growth Rate</span>
+    <span class="forecast-value {{ 'positive' if data.forecast.growth_rate >= 0 else 'negative' }}">
+      {{ data.forecast.growth_rate }}%
+    </span>
+  </div>
+  <div class="forecast-item">
+    <span class="forecast-label">Confidence</span>
+    <span class="forecast-value">{{ data.forecast.confidence }}%</span>
+  </div>
+</section>
+
+<div class="dashboard-grid">
+  <section class="panel">
+    <h2>Customer Segments (RFM)</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Tier</th>
+            <th>Segment</th>
+            <th>Recency</th>
+            <th>Frequency</th>
+            <th>Spend</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in data.segments[:15] %}
+          <tr>
+            <td>{{ c.customer_name }}</td>
+            <td>{{ c.loyalty_tier }}</td>
+            <td><span class="badge badge-{{ c.segment|lower|replace(' ', '-') if c.segment else 'low' }}">{{ c.segment or 'N/A' }}</span></td>
+            <td>{{ c.recency_days }}d</td>
+            <td>{{ c.frequency }}</td>
+            <td>${{ "%.2f"|format(c.monetary|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="empty">Not enough data for segmentation.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Churn Risk</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Risk Level</th>
+            <th>Score</th>
+            <th>Last Purchase</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in data.churn_risk[:15] %}
+          <tr>
+            <td>{{ c.customer_name }}</td>
+            <td><span class="badge badge-{{ c.risk_level|lower }}">{{ c.risk_level }}</span></td>
+            <td>{{ c.churn_probability }}%</td>
+            <td>{{ c.recency_days }} days ago</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No churn data available.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Top Products (Sales Prediction)</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Category</th>
+            <th>Units Sold</th>
+            <th>Revenue</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in data.top_products %}
+          <tr>
+            <td>{{ p.product_name }}</td>
+            <td>{{ p.category }}</td>
+            <td>{{ p.units_sold }}</td>
+            <td>${{ "%.2f"|format(p.revenue|float) }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="empty">No product data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="panel full-width">
+    <h2>Behavior Insights</h2>
+    {% if data.insights %}
+    <div class="insights-grid">
+      {% for insight in data.insights %}
+      <div class="insight-card">
+        <div class="insight-type">{{ insight.type }}</div>
+        <div class="insight-customer">{{ insight.customer_name or 'General' }}</div>
+        <div class="insight-value">{{ insight.value }}</div>
+        <div class="insight-confidence">Confidence: {{ insight.confidence }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty">No insights generated yet.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

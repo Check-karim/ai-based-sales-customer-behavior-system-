@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}My Purchases - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>My Purchases</h1>
+  <p>Track all your orders and their current status.</p>
+</div>
+
+{% if purchases %}
+<div class="panel">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for purchase in purchases %}
+        <tr>
+          <td>#{{ purchase.id }}</td>
+          <td>{{ purchase.sale_date.strftime('%b %d, %Y %H:%M') if purchase.sale_date else 'N/A' }}</td>
+          <td>${{ "%.2f"|format(purchase.total_amount|float) }}</td>
+          <td>{{ purchase.payment_method }}</td>
+          <td><span class="badge badge-status badge-{{ purchase.status|lower }}">{{ purchase.status }}</span></td>
+          <td><a href="{{ url_for('purchase_detail', sale_id=purchase.id) }}" class="btn-link">View Details</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="panel">
+  <p class="empty">No purchases yet. <a href="{{ url_for('shop') }}">Start shopping</a> to place your first order!</p>
+</div>
+{% endif %}
+{% endblock %}

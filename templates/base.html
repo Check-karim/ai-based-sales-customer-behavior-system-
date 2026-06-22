@@ -16,6 +16,9 @@
     {% if session.admin_id %}
     <ul class="nav-links">
       <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+      <li><a href="{{ url_for('admin_products') }}" class="{% if request.endpoint in ('admin_products', 'admin_add_product', 'admin_edit_product') %}active{% endif %}">Products</a></li>
+      <li><a href="{{ url_for('admin_purchases') }}" class="{% if request.endpoint in ('admin_purchases', 'admin_purchase_detail') %}active{% endif %}">Purchases</a></li>
+      <li><a href="{{ url_for('admin_predictions') }}" class="{% if request.endpoint == 'admin_predictions' %}active{% endif %}">Predictions</a></li>
       <li><a href="{{ url_for('reports') }}" class="{% if request.endpoint == 'reports' %}active{% endif %}">Reports</a></li>
       <li class="nav-user">Admin: {{ session.admin_name }}</li>
       <li><a href="{{ url_for('admin_logout') }}" class="btn-logout">Logout</a></li>
@@ -23,6 +26,8 @@
     {% elif session.user_id %}
     <ul class="nav-links">
       <li><a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Home</a></li>
+      <li><a href="{{ url_for('shop') }}" class="{% if request.endpoint in ('shop', 'cart') %}active{% endif %}">Shop</a></li>
+      <li><a href="{{ url_for('purchases') }}" class="{% if request.endpoint in ('purchases', 'purchase_detail') %}active{% endif %}">My Purchases</a></li>
       <li><a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">About Us</a></li>
       <li><a href="{{ url_for('profile') }}" class="{% if request.endpoint == 'profile' %}active{% endif %}">My Account</a></li>
       <li class="nav-user">Hello, {{ session.user_name }}</li>
@@ -31,6 +36,7 @@
     {% else %}
     <ul class="nav-links">
       <li><a href="{{ url_for('home') }}" class="{% if request.endpoint == 'home' %}active{% endif %}">Home</a></li>
+      <li><a href="{{ url_for('shop') }}" class="{% if request.endpoint == 'shop' %}active{% endif %}">Shop</a></li>
       <li><a href="{{ url_for('about') }}" class="{% if request.endpoint == 'about' %}active{% endif %}">About Us</a></li>
       <li><a href="{{ url_for('user_login') }}" class="{% if request.endpoint == 'user_login' %}active{% endif %}">Login</a></li>
       <li><a href="{{ url_for('register') }}" class="btn-nav-register">Register</a></li>

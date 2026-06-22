@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}All Purchases - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>All Purchases</h1>
+  <p>View and manage customer orders.</p>
+</div>
+
+<div class="panel">
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Customer</th>
+          <th>Date</th>
+          <th>Amount</th>
+          <th>Payment</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for purchase in purchases %}
+        <tr>
+          <td>#{{ purchase.id }}</td>
+          <td>{{ purchase.customer_name }}</td>
+          <td>{{ purchase.sale_date.strftime('%b %d, %Y %H:%M') if purchase.sale_date else 'N/A' }}</td>
+          <td>${{ "%.2f"|format(purchase.total_amount|float) }}</td>
+          <td>{{ purchase.payment_method }}</td>
+          <td><span class="badge badge-status badge-{{ purchase.status|lower }}">{{ purchase.status }}</span></td>
+          <td><a href="{{ url_for('admin_purchase_detail', sale_id=purchase.id) }}" class="btn-link">Manage</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="empty">No purchases yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

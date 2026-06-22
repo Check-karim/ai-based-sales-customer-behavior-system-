@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if product else 'Add' }} Product - Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ 'Edit' if product else 'Add' }} Product</h1>
+</div>
+
+<div class="panel" style="max-width: 520px;">
+  <form method="POST">
+    <div class="form-group">
+      <label for="name">Product Name</label>
+      <input type="text" id="name" name="name" value="{{ product.name if product else '' }}" required>
+    </div>
+    <div class="form-group">
+      <label for="category_id">Category</label>
+      <select id="category_id" name="category_id" required>
+        <option value="">Select category</option>
+        {% for cat in categories %}
+        <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="price">Price ($)</label>
+        <input type="number" id="price" name="price" step="0.01" min="0" value="{{ product.price if product else '' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="stock_quantity">Stock Quantity</label>
+        <input type="number" id="stock_quantity" name="stock_quantity" min="0" value="{{ product.stock_quantity if product else 0 }}" required>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ 'Save Changes' if product else 'Add Product' }}</button>
+      <a href="{{ url_for('admin_products') }}" class="btn btn-outline-dark">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

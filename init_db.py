@@ -47,6 +47,35 @@ def run_schema():
   print("Database schema loaded successfully.")
 
 
+def migrate_schema():
+  conn = mysql.connector.connect(
+    host=Config.MYSQL_HOST,
+    port=Config.MYSQL_PORT,
+    user=Config.MYSQL_USER,
+    password=Config.MYSQL_PASSWORD,
+    database=Config.MYSQL_DATABASE,
+  )
+  cursor = conn.cursor()
+  try:
+    cursor.execute(
+      """
+      ALTER TABLE sales
+      ADD COLUMN status ENUM(
+        'Pending', 'Confirmed', 'Processing', 'Ready', 'Completed', 'Cancelled'
+      ) DEFAULT 'Pending' AFTER payment_method
+      """
+    )
+    cursor.execute("UPDATE sales SET status = 'Completed'")
+    conn.commit()
+    print("Added status column to sales table.")
+  except mysql.connector.Error as e:
+    if e.errno != 1060:
+      print(f"Migration warning: {e}")
+  finally:
+    cursor.close()
+    conn.close()
+
+
 def setup_admin():
   conn = mysql.connector.connect(
     host=Config.MYSQL_HOST,
@@ -82,5 +111,6 @@ def setup_admin():
 if __name__ == "__main__":
   print("Initializing Deluxe Supermarket database...")
   run_schema()
+  migrate_schema()
   setup_admin()
   print("Done! Run 'python app.py' to start the application.")

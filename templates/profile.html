@@ -38,30 +38,37 @@
   </section>
 
   <section class="panel full-width">
-    <h2>Recent Purchases</h2>
+    <div class="panel-header-row">
+      <h2>Recent Purchases</h2>
+      <a href="{{ url_for('purchases') }}" class="btn-link">View All</a>
+    </div>
     {% if purchases %}
     <div class="table-responsive">
       <table>
         <thead>
           <tr>
+            <th>Order #</th>
             <th>Date</th>
             <th>Amount</th>
             <th>Payment Method</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
           {% for purchase in purchases %}
           <tr>
+            <td><a href="{{ url_for('purchase_detail', sale_id=purchase.id) }}">#{{ purchase.id }}</a></td>
             <td>{{ purchase.sale_date.strftime('%b %d, %Y %H:%M') if purchase.sale_date else 'N/A' }}</td>
             <td>${{ "%.2f"|format(purchase.total_amount|float) }}</td>
             <td>{{ purchase.payment_method }}</td>
+            <td><span class="badge badge-status badge-{{ purchase.status|lower }}">{{ purchase.status }}</span></td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
     {% else %}
-    <p class="empty">No purchases yet. Visit our store to start earning rewards!</p>
+    <p class="empty">No purchases yet. <a href="{{ url_for('shop') }}">Visit our shop</a> to start earning rewards!</p>
     {% endif %}
   </section>
 </div>

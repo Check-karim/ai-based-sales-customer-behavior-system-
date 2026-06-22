@@ -8,7 +8,7 @@
     <h1>Welcome to Deluxe Supermarket</h1>
     <p>Fresh products, unbeatable prices, and a shopping experience you'll love.</p>
     <div class="hero-actions">
-      <a href="{{ url_for('register') }}" class="btn btn-primary">Join Now</a>
+      <a href="{{ url_for('shop') }}" class="btn btn-primary">Shop Now</a>
       <a href="{{ url_for('about') }}" class="btn btn-outline">Learn More</a>
     </div>
   </div>
@@ -49,6 +49,7 @@
       <div class="product-category">{{ product.category }}</div>
       <h3>{{ product.name }}</h3>
       <div class="product-price">${{ "%.2f"|format(product.price|float) }}</div>
+      <a href="{{ url_for('shop') }}" class="btn btn-primary btn-sm">View in Shop</a>
     </div>
     {% endfor %}
   </div>
@@ -59,7 +60,7 @@
   <h2>Ready to start shopping?</h2>
   <p>Create your free account today and join our loyalty program.</p>
   {% if session.user_id %}
-    <a href="{{ url_for('profile') }}" class="btn btn-primary">Go to My Account</a>
+    <a href="{{ url_for('shop') }}" class="btn btn-primary">Start Shopping</a>
   {% else %}
     <a href="{{ url_for('register') }}" class="btn btn-primary">Create Account</a>
     <a href="{{ url_for('user_login') }}" class="btn btn-outline-light">Sign In</a>

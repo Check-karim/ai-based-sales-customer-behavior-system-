@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ purchase.id }} - Deluxe Supermarket{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Order #{{ purchase.id }}</h1>
+  <p>Placed on {{ purchase.sale_date.strftime('%B %d, %Y at %H:%M') if purchase.sale_date else 'N/A' }}</p>
+</div>
+
+<div class="profile-grid">
+  <section class="panel">
+    <h2>Order Status</h2>
+    <div class="status-tracker">
+      <span class="badge badge-status badge-{{ purchase.status|lower }} badge-large">{{ purchase.status }}</span>
+    </div>
+    <dl class="profile-details" style="margin-top: 1rem;">
+      <dt>Payment Method</dt>
+      <dd>{{ purchase.payment_method }}</dd>
+      <dt>Total Amount</dt>
+      <dd>${{ "%.2f"|format(purchase.total_amount|float) }}</dd>
+    </dl>
+  </section>
+
+  <section class="panel">
+    <h2>Items Ordered</h2>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in purchase.line_items %}
+          <tr>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ "%.2f"|format(item.unit_price|float) }}</td>
+            <td>${{ "%.2f"|format(item.subtotal|float) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="page-actions">
+  <a href="{{ url_for('purchases') }}" class="btn btn-outline-dark">Back to Purchases</a>
+  <a href="{{ url_for('shop') }}" class="btn btn-primary">Shop More</a>
+</div>
+{% endblock %}

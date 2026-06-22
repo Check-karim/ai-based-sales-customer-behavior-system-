@@ -5,8 +5,32 @@ from datetime import datetime, date
 
 from config import Config
 from database import execute_query
-from services.ai_analytics import get_full_dashboard_data
+from services.ai_analytics import (
+  get_full_dashboard_data,
+  get_sales_forecast,
+  segment_customers_rfm,
+  predict_churn_risk,
+  generate_behavior_insights,
+  get_top_products,
+)
 from services.reports import generate_excel_report, generate_pdf_report
+from services.store import (
+  PAYMENT_METHODS,
+  SALE_STATUSES,
+  get_available_products,
+  get_all_products,
+  get_product,
+  get_categories,
+  get_cart_products,
+  create_purchase,
+  get_customer_purchases,
+  get_purchase_detail,
+  get_all_purchases,
+  create_product,
+  update_product,
+  delete_product,
+  update_purchase_status,
+)
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -222,18 +246,129 @@ def user_logout():
 @user_required
 def profile():
   user = get_user_profile(session["user_id"])
-  purchases = execute_query(
-    """
-    SELECT sale_date, total_amount, payment_method
-    FROM sales
-    WHERE customer_id = %s
-    ORDER BY sale_date DESC
-    LIMIT 10
-    """,
-    (user["customer_id"],),
-    fetch=True,
-  ) or []
+  purchases = get_customer_purchases(user["customer_id"])[:5]
   return render_template("profile.html", user=user, purchases=purchases)
+
+
+# --- User shopping routes ---
+
+def get_cart():
+  return session.get("cart", {})
+
+
+def save_cart(cart):
+  session["cart"] = cart
+
+
+@app.route("/shop")
+def shop():
+  products = get_available_products()
+  return render_template("shop.html", products=products, cart_count=sum(get_cart().values()))
+
+
+@app.route("/shop/add-to-cart", methods=["POST"])
+@user_required
+def add_to_cart():
+  product_id = request.form.get("product_id", type=int)
+  quantity = request.form.get("quantity", type=int, default=1)
+
+  if not product_id or quantity < 1:
+    flash("Invalid product or quantity.", "danger")
+    return redirect(url_for("shop"))
+
+  product = get_product(product_id)
+  if not product or product["stock_quantity"] < 1:
+    flash("Product is not available.", "danger")
+    return redirect(url_for("shop"))
+
+  cart = get_cart()
+  pid = str(product_id)
+  current_qty = cart.get(pid, 0)
+  new_qty = current_qty + quantity
+  if new_qty > product["stock_quantity"]:
+    flash(f"Only {product['stock_quantity']} units of {product['name']} available.", "warning")
+    new_qty = product["stock_quantity"]
+
+  cart[pid] = new_qty
+  save_cart(cart)
+  flash(f"Added {product['name']} to your cart.", "success")
+  return redirect(url_for("shop"))
+
+
+@app.route("/cart")
+@user_required
+def cart():
+  cart_items = get_cart_products(get_cart())
+  total = sum(item["subtotal"] for item in cart_items)
+  return render_template(
+    "cart.html",
+    cart_items=cart_items,
+    total=total,
+    payment_methods=PAYMENT_METHODS,
+  )
+
+
+@app.route("/cart/update", methods=["POST"])
+@user_required
+def update_cart():
+  cart = get_cart()
+  for key in request.form:
+    if key.startswith("qty_"):
+      product_id = key[4:]
+      quantity = request.form.get(key, type=int, default=0)
+      if quantity <= 0:
+        cart.pop(product_id, None)
+      else:
+        product = get_product(int(product_id))
+        if product and quantity > product["stock_quantity"]:
+          quantity = product["stock_quantity"]
+        cart[product_id] = quantity
+  save_cart(cart)
+  flash("Cart updated.", "info")
+  return redirect(url_for("cart"))
+
+
+@app.route("/cart/checkout", methods=["POST"])
+@user_required
+def checkout():
+  payment_method = request.form.get("payment_method", "Card")
+  cart_items = get_cart_products(get_cart())
+  if not cart_items:
+    flash("Your cart is empty.", "warning")
+    return redirect(url_for("shop"))
+
+  user = get_user_profile(session["user_id"])
+  try:
+    sale_id = create_purchase(
+      user["customer_id"],
+      [{"product_id": item["product_id"], "quantity": item["quantity"]} for item in cart_items],
+      payment_method,
+    )
+    save_cart({})
+    flash(f"Purchase placed successfully! Order #{sale_id}", "success")
+    return redirect(url_for("purchase_detail", sale_id=sale_id))
+  except ValueError as e:
+    flash(str(e), "danger")
+    return redirect(url_for("cart"))
+
+
+@app.route("/purchases")
+@user_required
+def purchases():
+  user = get_user_profile(session["user_id"])
+  purchase_list = get_customer_purchases(user["customer_id"])
+  return render_template("purchases.html", purchases=purchase_list)
+
+
+@app.route("/purchases/<int:sale_id>")
+@user_required
+def purchase_detail(sale_id):
+  user = get_user_profile(session["user_id"])
+  purchase = get_purchase_detail(sale_id, customer_id=user["customer_id"])
+  if not purchase:
+    flash("Purchase not found.", "danger")
+    return redirect(url_for("purchases"))
+  return render_template("purchase_detail.html", purchase=purchase)
 
 
 # --- Admin routes ---
@@ -328,6 +463,132 @@ def download_pdf():
   except Exception as e:
     flash(f"Failed to generate PDF report: {e}", "danger")
     return redirect(url_for("reports"))
+
+
+@app.route("/admin/products")
+@admin_required
+def admin_products():
+  products = get_all_products()
+  return render_template("admin_products.html", products=products)
+
+
+@app.route("/admin/products/add", methods=["GET", "POST"])
+@admin_required
+def admin_add_product():
+  categories = get_categories()
+  if request.method == "POST":
+    name = request.form.get("name", "").strip()
+    category_id = request.form.get("category_id", type=int)
+    price = request.form.get("price", type=float)
+    stock_quantity = request.form.get("stock_quantity", type=int, default=0)
+
+    if not name or not category_id or price is None or price < 0:
+      flash("Please fill in all required fields correctly.", "danger")
+      return render_template("admin_product_form.html", product=None, categories=categories)
+
+    create_product(name, category_id, price, max(stock_quantity, 0))
+    flash(f"Product '{name}' added successfully.", "success")
+    return redirect(url_for("admin_products"))
+
+  return render_template("admin_product_form.html", product=None, categories=categories)
+
+
+@app.route("/admin/products/<int:product_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_edit_product(product_id):
+  product = get_product(product_id)
+  if not product:
+    flash("Product not found.", "danger")
+    return redirect(url_for("admin_products"))
+
+  categories = get_categories()
+  if request.method == "POST":
+    name = request.form.get("name", "").strip()
+    category_id = request.form.get("category_id", type=int)
+    price = request.form.get("price", type=float)
+    stock_quantity = request.form.get("stock_quantity", type=int, default=0)
+
+    if not name or not category_id or price is None or price < 0:
+      flash("Please fill in all required fields correctly.", "danger")
+      return render_template("admin_product_form.html", product=product, categories=categories)
+
+    update_product(product_id, name, category_id, price, max(stock_quantity, 0))
+    flash(f"Product '{name}' updated successfully.", "success")
+    return redirect(url_for("admin_products"))
+
+  return render_template("admin_product_form.html", product=product, categories=categories)
+
+
+@app.route("/admin/products/<int:product_id>/delete", methods=["POST"])
+@admin_required
+def admin_delete_product(product_id):
+  product = get_product(product_id)
+  if not product:
+    flash("Product not found.", "danger")
+    return redirect(url_for("admin_products"))
+
+  try:
+    delete_product(product_id)
+    flash(f"Product '{product['name']}' deleted.", "success")
+  except ValueError as e:
+    flash(str(e), "danger")
+  return redirect(url_for("admin_products"))
+
+
+@app.route("/admin/purchases")
+@admin_required
+def admin_purchases():
+  purchase_list = get_all_purchases()
+  return render_template("admin_purchases.html", purchases=purchase_list)
+
+
+@app.route("/admin/purchases/<int:sale_id>")
+@admin_required
+def admin_purchase_detail(sale_id):
+  purchase = get_purchase_detail(sale_id)
+  if not purchase:
+    flash("Purchase not found.", "danger")
+    return redirect(url_for("admin_purchases"))
+  return render_template(
+    "admin_purchase_detail.html",
+    purchase=purchase,
+    statuses=SALE_STATUSES,
+  )
+
+
+@app.route("/admin/purchases/<int:sale_id>/status", methods=["POST"])
+@admin_required
+def admin_update_purchase_status(sale_id):
+  status = request.form.get("status", "")
+  try:
+    update_purchase_status(sale_id, status)
+    flash(f"Purchase #{sale_id} status updated to {status}.", "success")
+  except ValueError as e:
+    flash(str(e), "danger")
+  return redirect(url_for("admin_purchase_detail", sale_id=sale_id))
+
+
+@app.route("/admin/predictions")
+@admin_required
+def admin_predictions():
+  try:
+    data = {
+      "forecast": get_sales_forecast(),
+      "segments": segment_customers_rfm(),
+      "churn_risk": predict_churn_risk(),
+      "insights": generate_behavior_insights(),
+      "top_products": get_top_products(10),
+    }
+  except Exception as e:
+    flash(f"Failed to load predictions: {e}", "danger")
+    data = {
+      "forecast": {"forecast_revenue": 0, "growth_rate": 0, "confidence": 0},
+      "segments": [],
+      "churn_risk": [],
+      "insights": [],
+      "top_products": [],
+    }
+  return render_template("admin_predictions.html", data=data)
 
 
 if __name__ == "__main__":
